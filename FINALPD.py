@@ -9,7 +9,9 @@ def cls():
 
 # now, to clear the screen
 
-
+colores = [ 'NEGRO' , 'AZUL' , 'AMARILLO' , 'ROJO' , 'VERDE' ]
+pozo = []
+baraja=[]
 
 def crearBaraja():
     baraja=[]
@@ -31,7 +33,6 @@ def crearBaraja():
 
     return baraja
 
-
 def pintarCarta(carta):
     return(((carta["color"]+" ") if carta["color"]!="NEGRO" else " ") + carta["valor"])
 
@@ -47,7 +48,6 @@ def cumpleLasReglas(cartaEscogida, cartaEnMesa):
         return True
    
     if cartaEnMesa['valor'] == "SE SALTEO UN JUGADOR " and cartaEscogida["valor"] == "SALTAR JUGADOR":
-        
         return True
 
     if cartaEnMesa["color"] == cartaEscogida["color"] or  cartaEnMesa["valor"] == cartaEscogida["valor"] :
@@ -76,10 +76,9 @@ def robarCarta(baraja,jugador):
     return jugador, baraja
 
 def escogerCarta(jugador, cartaEnMesa, baraja, jugadores):
-
+    
     repetir = True
     #cls()
-    print( "Turno de " + jugador["Nombre"] )
     if cartaEnMesa["valor"]=="+2":
         print("Roba dos cartas")
         for _ in range(2):
@@ -91,9 +90,15 @@ def escogerCarta(jugador, cartaEnMesa, baraja, jugadores):
             jugador, baraja = robarCarta(baraja, jugador)
 
     if cartaEnMesa["valor"]!="SALTAR JUGADOR":
-        for pepe in (jugadores):
-            print(pepe["Nombre"])
         while repetir:
+            cls()
+            print( " - Turno de " + jugador["Nombre"] + " -")
+            print("\n")
+            print("Orden Turnos: ")
+            orden = 1;
+            for pepe in (jugadores):
+                print("1) " + pepe["Nombre"])
+            print("\n")
             mostrarMano(jugador, True)
 
             print("\r \n \r \n Carta en la mesa:" + pintarCarta(pozo[-1]))
@@ -117,9 +122,7 @@ def escogerCarta(jugador, cartaEnMesa, baraja, jugadores):
 
                     repetir = False
                 else:        
-                   # cls()
                     print("Esa carta no vale")
-                    print( "Turno de " + jugador["Nombre"] )
     else:
         cartaEnMesa["valor"] = "SE SALTEO UN JUGADOR" 
         cartaEscogida = cartaEnMesa           
@@ -145,15 +148,29 @@ def calcularPuntos(jugador):
         contador += puntuar(carta)
     return contador
 
+def inicio():
+    cls()
+    print(" ----- Bienvenido al Uno! ----- ")
+    cantidad = 0
+    while cantidad < 2 or cantidad > 4:
+        cantidad = input("Indique la cantidad de jugadores (min 2 - max 4): ")
+        cantidad = int(cantidad)
+    return cantidad
+
+def crearJugadores(cantidad):
+    jugadores = list(dict())
+    for x in range(cantidad):
+        jugador = {'Nombre': input("Ingrese el nombre del jugador [ "+ str(x+1) +" ]: "), 'Mano': [], 'Tipo': "Humano"}
+        jugadores.append(jugador)
+    return jugadores
+
 def main():
-    colores = [ 'NEGRO' , 'AZUL' , 'AMARILLO' , 'ROJO' , 'VERDE' ]
-    pozo = []
-    baraja=[]    
+        
     baraja=crearBaraja()
 
-    jugadores=[{"Nombre":"","Mano":[], "Tipo":"Humano"}, {"Nombre":"Benjamin","Mano":[], "Tipo":"IA"}, {"Nombre":"Bot","Mano":[], "Tipo":"IA"}]
+    cantidad_jugadores = inicio()
 
-    jugadores[0]["Nombre"]=input("Hola, cual es tu nombre?:")
+    jugadores = crearJugadores(cantidad_jugadores)
 
     rd.shuffle(baraja)
     rd.shuffle(baraja)
@@ -168,7 +185,6 @@ def main():
 
     pozo.append(baraja[0])
     baraja = baraja[1:]
-
     continuar = True
 
     while continuar:
@@ -176,8 +192,7 @@ def main():
             continuar = False
 
         for jugador in jugadores:
-            
-            print( "Turno de " + jugador["Nombre"] )
+            cls()
             if pozo[-1]["color"] == "NEGRO":
                 print("Cambia el Color:")
                 pozo[-1]["color"] = escogerColor()
@@ -185,9 +200,12 @@ def main():
             if cartaEscogida != None:
                 pozo.append(cartaEscogida)
             if len(jugador["Mano"])==0:
-                print(jugador["Nombre"] + " GANA LA PARTIDA")
+                cls()
+                print(" ----------- " + jugador["Nombre"] + " GANA LA PARTIDA ------")
+                print("\n")
                 for perdedor in jugadores:
                     if perdedor != jugador:
-                        print(perdedor["Nombre"]+" perdio y se quedo con ("+ str(calcularPuntos(perdedor))+") pts")
+                        print(" - " + perdedor["Nombre"]+" perdio - Puntaje final: ("+ str(calcularPuntos(perdedor))+") pts")
                 continuar = False
-
+if __name__ == "__main__" : 
+    main()
