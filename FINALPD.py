@@ -71,9 +71,12 @@ def escogerColor():
     return colores[int(colorEscogido)]
 
 def robarCarta(baraja,jugador):
-    jugador["Mano"].append(baraja[0])
-    baraja = baraja[1:]
-    return jugador, baraja
+    if len(baraja) > 0:
+        jugador["Mano"].append(baraja[0])
+        baraja = baraja[1:]
+    else:
+        print("no hay mas cartas :(")
+    return jugador, baraja 
 
 def escogerCarta(jugador, cartaEnMesa, baraja, jugadores):
     
@@ -92,8 +95,11 @@ def escogerCarta(jugador, cartaEnMesa, baraja, jugadores):
     if cartaEnMesa["valor"]!="SALTAR JUGADOR":
         while repetir:
             cls()
+            if baraja == None:
+                print("No hay mas cartas en el mazo! \n")
             print( " - Turno de " + jugador["Nombre"] + " -")
             print("\n")
+            print(len(baraja))
             print("Orden Turnos: ")
             orden = 1;
             for pepe in (jugadores):
@@ -188,9 +194,9 @@ def main():
     continuar = True
 
     while continuar:
-        if len(baraja)<=0:
+        if len(baraja) == 0:
             continuar = False
-
+        
         for jugador in jugadores:
             cls()
             if pozo[-1]["color"] == "NEGRO":
