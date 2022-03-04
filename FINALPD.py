@@ -1,8 +1,8 @@
 from curses import termattrs
 import random as rd
 import re
-
 import os
+from collections import deque
 
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
@@ -15,26 +15,18 @@ baraja=[]
 
 def crearBaraja():
     baraja=[]
-    pozo = []
-    for i in range(0,9):
-        for color in colores[1:]:
-            if(color!='NEGRO'): #SALTEO EL NEGRO
-                baraja.append({"color":color, "valor":str(i)} )
-    
-    for _ in range(4): #AGREGO CARTAS ESPECIALES
-        baraja.append({"color":"NEGRO", "valor":"+4"})
-        baraja.append({"color":"NEGRO", "valor":"COMODIN"})
-    
-    for _ in range(4): #AGREGO CARTAS ESPECIALES
-        for color in colores[1:]:
-            baraja.append({"color":color, "valor":"+2"})
-            baraja.append({"color":color, "valor":"SALTAR JUGADOR"})
-            baraja.append({"color":color, "valor":"CAMBIAR SANTIDO"})
-
-    return baraja
+    coloresComunes = deque(colores)
+    coloresComunes.popleft()
+    baraja = [(n, p) for n in list(range(0,9)) for p in coloresComunes] * 2
+    especiales = ['+4', 'COMODIN']
+    colorEspecial = [colores[0]]
+    barajaEspeciales = [(n, p) for n in especiales for p in colorEspecial] * 4  
+    especialesMasDos = ['+2', 'SALTAR JUGADOR', 'CAMBIAR SENTIDO']
+    barajaMasDos = [(n, p) for n in especialesMasDos for p in coloresComunes] * 2
+    return baraja + barajaEspeciales + barajaMasDos
 
 def pintarCarta(carta):
-    return(((carta["color"]+" ") if carta["color"]!="NEGRO" else " ") + carta["valor"])
+    return(((str(carta[1])+" ") if carta[1]!="NEGRO" else " ") + str(carta[0]))
 
 def mostrarMano(jugador, numeradas = True):
     i = 1
@@ -43,14 +35,14 @@ def mostrarMano(jugador, numeradas = True):
         i+=1   
 
 def cumpleLasReglas(cartaEscogida, cartaEnMesa):
-    if cartaEscogida["color"] == "NEGRO":
+    if cartaEscogida[1] == "NEGRO":
         print("------------NEGRO---------------")
         return True
    
-    if cartaEnMesa['valor'] == "SE SALTEO UN JUGADOR " and cartaEscogida["valor"] == "SALTAR JUGADOR":
+    if cartaEnMesa[1] == "SE SALTEO UN JUGADOR " and cartaEscogida[1] == "SALTAR JUGADOR":
         return True
 
-    if cartaEnMesa["color"] == cartaEscogida["color"] or  cartaEnMesa["valor"] == cartaEscogida["valor"] :
+    if cartaEnMesa[1] == cartaEscogida[1] or  cartaEnMesa[1] == cartaEscogida[1] :
         return True
    
     else:
@@ -59,7 +51,6 @@ def cumpleLasReglas(cartaEscogida, cartaEnMesa):
 def escogerColor():
     repetir = True
     colorEscogido = ""
-
     while repetir:
         i = 1
         for color in colores[1:]:
@@ -81,29 +72,29 @@ def robarCarta(baraja,jugador):
 def escogerCarta(jugador, cartaEnMesa, baraja, jugadores):
     
     repetir = True
-    #cls()
-    if cartaEnMesa["valor"]=="+2":
+    cls()
+    if cartaEnMesa[0]=="+2":
         print("Roba dos cartas")
         for _ in range(2):
             jugador, baraja = robarCarta(baraja, jugador)
 
-    if cartaEnMesa["valor"]=="+4":
+    if cartaEnMesa[0]=="+4":
         print("Roba cuatro cartas")
         for _  in range(4):
             jugador, baraja = robarCarta(baraja, jugador)
 
-    if cartaEnMesa["valor"]!="SALTAR JUGADOR":
+    if cartaEnMesa[0]!="SALTAR JUGADOR":
         while repetir:
             cls()
             if baraja == None:
                 print("No hay mas cartas en el mazo! \n")
             print( " - Turno de " + jugador["Nombre"] + " -")
             print("\n")
-            print(len(baraja))
+            print("Cantidad de cartas en el mazo: " + str(len(baraja)) + "\n")
             print("Orden Turnos: ")
-            orden = 1;
-            for pepe in (jugadores):
-                print("1) " + pepe["Nombre"])
+            for jugadorT in (jugadores):
+                print("- " + jugadorT["Nombre"])
+                # print(jugadorT["Mano"])
             print("\n")
             mostrarMano(jugador, True)
 
@@ -120,9 +111,10 @@ def escogerCarta(jugador, cartaEnMesa, baraja, jugadores):
                 cartaEscogida = jugador["Mano"][int(idCartaEscogida)-1]
                 if cumpleLasReglas(cartaEscogida, cartaEnMesa):
                     jugador["Mano"] = jugador["Mano"][0: int(idCartaEscogida)-1] + jugador["Mano"][int(idCartaEscogida):] 
-                    if(cartaEscogida["color"]=="NEGRO"):
-                        cartaEscogida["color"]= escogerColor()
-                    if cartaEscogida["valor"] == "CAMBIAR SANTIDO":
+                    if(cartaEscogida[1]=="NEGRO"):
+                        print(cartaEscogida)
+                        # cartaEscogida[1]= escogerColor()
+                    if cartaEscogida[1] == "CAMBIAR SANTIDO":
 
                         jugadores = jugadores[::-1]
 
@@ -130,23 +122,23 @@ def escogerCarta(jugador, cartaEnMesa, baraja, jugadores):
                 else:        
                     print("Esa carta no vale")
     else:
-        cartaEnMesa["valor"] = "SE SALTEO UN JUGADOR" 
-        cartaEscogida = cartaEnMesa           
+         
+        cartaEscogida = ("SE SALTEO UN JUGADOR",cartaEnMesa[1])           
     return cartaEscogida, baraja, jugadores
 
 def puntuar(carta):
 
-   if carta["valor"]=="+4":
+   if carta[0]=="+4":
       return 100
-   if carta["valor"]=="+2":
+   if carta[0]=="+2":
       return 20
-   if carta["valor"]=="COMODIN":
+   if carta[0]=="COMODIN":
       return 20
-   if carta["valor"]=="SALTAR JUGADOR":
+   if carta[0]=="SALTAR JUGADOR":
       return 50
-   if carta["valor"]=="CAMBIAR SANTIDO":
+   if carta[0]=="CAMBIAR SANTIDO":
       return 50
-   return int(carta["valor"])
+   return int(carta[0])
 
 def calcularPuntos(jugador):
     contador = 0 
@@ -173,7 +165,7 @@ def crearJugadores(cantidad):
 def main():
         
     baraja=crearBaraja()
-
+    print(baraja)
     cantidad_jugadores = inicio()
 
     jugadores = crearJugadores(cantidad_jugadores)
@@ -188,20 +180,23 @@ def main():
             jugador["Mano"].append(baraja[0])
             baraja = baraja[1:]
 
+    
 
     pozo.append(baraja[0])
     baraja = baraja[1:]
     continuar = True
-
     while continuar:
-        if len(baraja) == 0:
-            continuar = False
-        
         for jugador in jugadores:
             cls()
-            if pozo[-1]["color"] == "NEGRO":
+            print(baraja)
+            if pozo[-1][1] == "NEGRO":
                 print("Cambia el Color:")
-                pozo[-1]["color"] = escogerColor()
+                print(pozo[-1][1])
+                nuevoCartaV = pozo[-1][0]
+                nuevoCartaC = escogerColor()
+                nuevaCarta =(nuevoCartaV,nuevoCartaC)
+                pozo[-1] = nuevaCarta
+
             cartaEscogida, baraja, jugadores = escogerCarta(jugador, pozo[-1], baraja, jugadores)
             if cartaEscogida != None:
                 pozo.append(cartaEscogida)
@@ -213,5 +208,7 @@ def main():
                     if perdedor != jugador:
                         print(" - " + perdedor["Nombre"]+" perdio - Puntaje final: ("+ str(calcularPuntos(perdedor))+") pts")
                 continuar = False
+        if len(baraja) == 0:
+            continuar = False
 if __name__ == "__main__" : 
     main()
