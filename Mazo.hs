@@ -7,7 +7,6 @@ module Mazo
     getColor,
     crearMazo,
     mezclarCartas,
-    --quitarCarta,
 ) where
 
 import System.Random
@@ -59,6 +58,7 @@ getValorPts carta
   | valor carta == 13 = 20
   | valor carta == 14 = 100
   | otherwise = 0
+
 -- Obtenemos el Color de la carta
 getColor :: Carta -> Color
 getColor carta
@@ -68,14 +68,10 @@ getColor carta
 
 cartasComunes = [Carta v p | p <- [Azul ..], v <- [0..12]] 
 cartasEspeciales = [Carta v p | p <- [Negro], v <- [13,14]] 
--- Creamos un mazo con listas por comprension
+
 crearMazo :: [Carta]
 crearMazo =  cartasComunes  ++ cartasComunes  ++ cartasEspeciales ++ cartasEspeciales
 
-
-{- Mezclamos las cartas: recibimos una lista vacia donde
- iremos agregando las cartas que quitamos de forma aleatoria del mazo sin mezclar,
- esto lo hacemos hasta que en el mazo sin mezclar no queden mas cartas -}
 mezclarCartas :: [Carta] -> [Carta] -> IO [Carta]
 mezclarCartas mezclado [] = return mezclado
 mezclarCartas mezclado sinMezclar = do
