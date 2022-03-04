@@ -165,7 +165,6 @@ def crearJugadores(cantidad):
 def main():
         
     baraja=crearBaraja()
-    print(baraja)
     cantidad_jugadores = inicio()
 
     jugadores = crearJugadores(cantidad_jugadores)
@@ -188,7 +187,6 @@ def main():
     while continuar:
         for jugador in jugadores:
             cls()
-            print(baraja)
             if pozo[-1][1] == "NEGRO":
                 print("Cambia el Color:")
                 print(pozo[-1][1])
@@ -209,6 +207,8 @@ def main():
                         print(" - " + perdedor["Nombre"]+" perdio - Puntaje final: ("+ str(calcularPuntos(perdedor))+") pts")
                 continuar = False
         if len(baraja) == 0:
+            cls()
+            print("------ No hay mas cartas en la baraja FIN DEL JUEGO ----")
             continuar = False
 if __name__ == "__main__" : 
     main()
